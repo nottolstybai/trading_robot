@@ -1,0 +1,11 @@
+alpaca-trade-api
+jinja2
+yfinance~=0.1.70
+pymysql~=1.0.2
+fastapi
+uvicorn
+pandas~=1.4.1
+pytz
+websockets
+python-multipart
+pydantic~=1.9.0

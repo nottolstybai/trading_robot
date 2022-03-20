@@ -1,0 +1,10 @@
+#scrollable-content{
+    height: 400px;
+    overflow-y: scroll;
+}
+.column{
+    margin:58px;
+}
+.equity-chart{
+    margin-bottom: 50px
+}

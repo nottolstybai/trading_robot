@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>Stock list </h1>
+    <form action="" method="GET">
+        <div class="ui form">
+            <div class="four fields">
+                <div class="field">
+                    <select id="select" name="exchanges" class="ui dropdown">
+                        <option value="">Choose exchange...</option>
+                        {% for exchange in exchanges:%}
+                        <option value="{{exchange.exchange}}">{{exchange.exchange}}</option>
+                        {% endfor %}
+                    </select>
+                    <script>
+                        $('#select').dropdown();
+                    </script>
+                </div>
+                <div class="field">
+                    <select class="ui dropdown">
+                    </select>
+                </div>
+                <div class="field">
+                    <button class="ui primary button">Submit</button>
+                </div>
+                <div class="field">
+                    <div class="ui search">
+                        <div class="ui icon input">
+                            <input class="prompt" id="search-text" type="text" placeholder="Search ..." onkeyup="tableSearch()">
+                            <i class="search icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <table class="ui sortable selectable celled table" id="table-id">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>Name</th>
+                <th>Symbol</th>
+                <th>Market</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stocks:%}
+            <tr onclick="window.location='/stocks/{{stock.symbol}}';">
+                <td>{{stock.id}}</td>
+                <td>{{stock.name}}</td>
+                <td>{{stock.symbol}}</td>
+                <td>{{stock.exchange}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

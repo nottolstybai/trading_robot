@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>Symbol that are in queue</h1>
+    <form action="" method="GET">
+        <div class="ui form">
+            <div class="three fields">
+                <div class="field">
+                    <select id="select" name="strategy" class="ui dropdown">
+                        <option value="">Choose strategy...</option>
+                        {% for strategy in strategies:%}
+                        <option value="{{strategy.id}}">{{strategy.strategy}}</option>
+                        {% endfor %}
+                    </select>
+                    <script>
+                        $('#select').dropdown();
+                    </script>
+                </div>
+                <div class="field">
+                    <button class="ui primary button">Submit</button>
+                </div>
+                <div class="field">
+                    <div class="ui search">
+                        <div class="ui icon input">
+                            <input class="prompt" id="search-text" type="text" placeholder="Search ..." onkeyup="tableSearch()">
+                            <i class="search icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <table class="ui sortable selectable celled table" id="table-id">
+        <thead>
+            <tr>
+                <th>Strategy</th>
+                <th>Symbol</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stocks:%}
+            <tr onclick="window.location='/stocks/{{stock.symbol}}';">
+                <td>{{strategy.strategy}}</td>
+                <td>{{stock.symbol}}</td>
+                <td>{{stock.name}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

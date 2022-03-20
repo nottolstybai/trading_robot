@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>Order list</h1>
+    <div id="chart-id" class="equity-chart"></div>
+
+    <div class="ui grid" id="scrollable-content">
+        <div class="row">
+            <div class="column">
+                <p>Symbol</p>
+            </div>
+            <div class="column">
+                <p>Order info</p>
+            </div>
+            <div class="column">
+                <p>Order quantity</p>
+            </div>
+            <div class="column">
+                <p>Order price</p>
+            </div>
+            <div class="column">
+                <p>Filled qunatity</p>
+            </div>
+            <div class="column">
+                <p>Status</p>
+            </div>
+        </div>
+        {% for order in orders: %}
+        <div class="row">
+            <div class="column" style="font-weight: bold">
+                <p>{{ order.symbol }}</p>
+            </div>
+            <div class="column">
+                <p>{{ order.info }}</p>
+            </div>
+            <div class="column">
+                <p>{{ order.order_qty }}</p>
+            </div>
+            <div class="column">
+                <p>{{ order.price }}</p>
+            </div>
+            <div class="column">
+                <p>{{ order.filled_qty }}</p>
+            </div>
+            <div class="column">
+                {% if order.status == "filled" %}
+                <p style="color: green;">
+                    {{ order.status }}
+                </p>
+                {% else %}
+                <p>
+                    {{ order.status }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+<script>
+    chartBlock = document.getElementById("chart-id")
+    const chart = LightweightCharts.createChart(chartBlock, { width: chartBlock.offsetWidth, height: 400 });
+    const lineSeries = chart.addLineSeries();
+    lineSeries.setData([
+    {% for i in range(portfolio_len): %}
+        { time: '{{ portfolio_list[i].timestamp }}', value: {{ portfolio_list[i].equity }} },
+    {% endfor %}
+    ]);
+</script>
+{% endblock %}
