@@ -79,6 +79,7 @@ class RobotDatabase:
         query = self.get_query(columns, "INSERT")
         cursor = self.__connection.cursor()
         cursor.execute(query, variables)
+        self.__connection.commit()
     # TODO ПОТОМ ЗАКОНЧИТЬ КЛАСС БД ДЛЯ УДОБНОГО ПОЛЬЗОВАНИЯ
 
 

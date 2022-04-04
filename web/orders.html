@@ -1,7 +1,63 @@
 {% extends "layout.html" %}
 {% block content %}
     <h1>Order list</h1>
+
+    <div class="ui form">
+        <div class="two fields">
+            <div class="field">
+                <h2>${{ day_history_list[day_history_len-1].equity }}</h2>
+            </div>
+            <div class="field">
+                {{ day_history_list[day_history_len-1].profit_loss }}
+                Today Profit/Loss
+            </div>
+        </div>
+    </div>
     <div id="chart-id" class="equity-chart"></div>
+
+    <div class="submit-order-form">
+        <div class="ui form">
+            <div class="ui fields">
+                <div class="field">
+                    <label>Symbol</label>
+                    <input onkeyup="postSymbol()" type="text" name="symbol" placeholder="Enter here" id="symbol-id">
+                </div>
+                <div class="field">
+                    <label id="label-price-id"></label>
+                    <div id="yesterday-price-id"></div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Order Type</label>
+                <select id="order-type-id" name="strategies" class="ui dropdown">
+                    <option value="market">Market</option>
+                    <option value="limit">Limit</option>
+                    <option value="stop">Stop</option>
+                    <option value="stop limit">Stop limit</option>
+                </select>
+            </div>
+
+            <div class="field" id="changable-black-id"></div>
+
+            <div class="field">
+                <label>Quantity</label>
+                <input id="qty-id" type="text" name="quantity">
+            </div>
+            <div class="field">
+                <label>Time in Force</label>
+                <select id="tif-id" name="strategies" class="ui dropdown">
+                    <option value="day">Day</option>
+                    <option value="gtc">GTC</option>
+                    <option value="fok">FOK</option>
+                    <option value="ioc">IOC</option>
+                    <option value="opg">OPG</option>
+                    <option value="cls">CLS</option>
+                </select>
+            </div>
+            <button onclick="postOrderParameters()" class="ui button" type="submit">Submit</button>
+        </div>
+    </div>
 
     <div class="ui grid" id="scrollable-content">
         <div class="row">
@@ -46,9 +102,10 @@
                 <p style="color: green;">
                     {{ order.status }}
                 </p>
-                {% else %}
+                {% elif order.status in ["new", "accepted"] %}
                 <p>
                     {{ order.status }}
+                    <i id="cancel-icon-id" onclick="" class="trash alternate icon"></i>
                 </p>
                 {% endif %}
             </div>
@@ -56,13 +113,22 @@
         {% endfor %}
     </div>
 <script>
-    chartBlock = document.getElementById("chart-id")
-    const chart = LightweightCharts.createChart(chartBlock, { width: chartBlock.offsetWidth, height: 400 });
-    const lineSeries = chart.addLineSeries();
-    lineSeries.setData([
-    {% for i in range(portfolio_len): %}
-        { time: '{{ portfolio_list[i].timestamp }}', value: {{ portfolio_list[i].equity }} },
+    runUpdateFunc()
+
+    $('.ui.dropdown').dropdown();
+
+    var dayData = [
+    {% for portfolio in day_history_list %}
+        { time: {{ portfolio.timestamp }}, value: {{ portfolio.equity }} },
     {% endfor %}
-    ]);
+    ];
+
+    var monthData = [
+    {% for portfolio in month_history_list %}
+        { time: {{ portfolio.timestamp }}, value: {{ portfolio.equity }} },
+    {% endfor %}
+    ];
+
+    createChart(dayData, monthData);
 </script>
 {% endblock %}

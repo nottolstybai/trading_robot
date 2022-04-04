@@ -1,15 +1,14 @@
-import os
 import datetime
-import logging
 import time
 
-from database import create_db
+from pymysql import Connection
+
+from src.database import create_db
 from variables import variables as vb
-from strategies import scalp_algo_strategy
+from src.strategies import scalp_algo_strategy
 
 
-def check_db():
-    connection = create_db.connect(vb.host, vb.user, vb.password, vb.database, vb.port)
+def check_db(connection: Connection):
     cursor = connection.cursor()
     cursor.execute(f"SELECT * FROM stock_strategy")
     stock_strategy = cursor.fetchone()
@@ -27,9 +26,10 @@ def check_db():
 
 
 def schedule_api():
+    connection = create_db.connect(vb.host, vb.user, vb.password, vb.database, vb.port)
     while datetime.datetime.now().minute % 1 != 0:
         time.sleep(1)
-    check_db()
+    check_db(connection)
     while True:
         time.sleep(60)
-        check_db()
+        check_db(connection)

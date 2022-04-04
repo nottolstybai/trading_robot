@@ -6,30 +6,42 @@ from pymysql.connections import Connection
 from alpaca_trade_api.rest import TimeFrame
 from os import listdir
 
-from database import create_db
+from pathlib import Path
+from src.database import create_db
 from variables import variables as vb
 
 
 def populate_stock(connection: Connection, api: trade_api.rest.REST):
+    print(f"STOCK TABLE POPULATION STARTING ...")
     assets = api.list_assets(status='active', asset_class='us_equity')
+    asset_num_by_exchange = {str: int}
+    
     cursor = connection.cursor()
     cursor.execute("SELECT `symbol` FROM `stock`")
     rows = cursor.fetchall()
     symbols = [row['symbol'] for row in rows]
-
+    
     for asset in assets:
         try:
             if asset.tradable and asset.symbol not in symbols:
+                if asset_num_by_exchange.get(asset.exchange) is not None:
+                    asset_num_by_exchange[asset.exchange] += 1
+                else:
+                    asset_num_by_exchange[asset.exchange] = 1
+                    
                 query = "INSERT INTO `stock` (`symbol`, `name`, `exchange`) VALUES (%s, %s, %s);"
                 cursor.execute(query, (asset.symbol, asset.name, asset.exchange))
-                print(f"ADDED TO stock table: {asset.symbol}")
         except Exception as e:
-            print(asset.name)
-            print(e)
+            print(f"Exception is {e}")
+
+    for exchange in asset_num_by_exchange:
+        print(f"Processed {exchange} exchange with {asset_num_by_exchange[exchange]} symbols")
+
     connection.commit()
 
 
 def populate_stock_price(connection: Connection, api: trade_api.rest.REST):
+    print(f"STOCK_PRICE TABLE POPULATION STARTING ...")
     symbols = []
     stock_dict = {}
 
@@ -44,13 +56,12 @@ def populate_stock_price(connection: Connection, api: trade_api.rest.REST):
 
     chunk_size = 200
     for i in range(0, len(symbols), chunk_size):
+        print(f"Processing next 200 symbols")
+
         symbol_chunk = symbols[i: i + chunk_size]
         yesterday = (datetime.now(tz=pytz.timezone('US/Eastern')) - timedelta(days=1)).strftime("%Y-%m-%d")
-        print(yesterday)
-
         bars = api.get_bars(symbol_chunk, TimeFrame.Hour, start=yesterday, end=yesterday)
         for bar in bars:
-            print(f"Processing symbol {bar.S}")
             stock_id = stock_dict[bar.S]
             bar_time = bar.t.strftime("%Y/%m/%dT%H:%M")
             query = f'''INSERT INTO stock_price (stock_id, date, open, high, low, close, volume) VALUES ({stock_id}, 
@@ -60,12 +71,14 @@ def populate_stock_price(connection: Connection, api: trade_api.rest.REST):
 
 
 def populate_strategies(connection: Connection):
+    print(f"LOOKING FOR AVAILABLE STRATEGIES ...")
     cursor = connection.cursor()
     cursor.execute("SELECT `strategy` FROM `strategies`")
     rows = cursor.fetchall()
     strategies_in_db = [row['strategy'] for row in rows]
     # TODO вставить параметр strategy_path и заменить его на этот путь
-    strategies = listdir("C:/Users/Adil/PycharmProjects/TradingRobot/strategies")
+    path_to_strategies = str(Path(__file__).parent.parent) + "/strategies"
+    strategies = listdir(path_to_strategies)
     for strategy in strategies:
         if strategy.endswith(".py"):
             strategy = strategy.replace("_", " ")
@@ -73,7 +86,7 @@ def populate_strategies(connection: Connection):
             if strategy not in strategies_in_db:
                 query = "INSERT INTO `strategies` (`strategy`) VALUES (%s);"
                 cursor.execute(query, strategy)
-                print(f"Added new strategy to db: {strategy}")
+                print(f"Added new strategy to database: {strategy}")
     connection.commit()
 
 
@@ -96,9 +109,3 @@ def populate_stock_strategy(connection: Connection, symbol, strategy):
     print(f"{symbol} is added to list of assets that will be used for {strategy} strategy")
 
     connection.commit()
-
-
-if __name__ == '__main__':
-    api = trade_api.REST(vb.api_key, vb.secret_key, vb.base_url)
-    connection = create_db.connect(vb.host, vb.user, vb.password, vb.database, vb.port)
-    populate_stock_price(connection, api)

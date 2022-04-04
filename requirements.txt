@@ -9,3 +9,4 @@ pytz
 websockets
 python-multipart
 pydantic~=1.9.0
+sqlalchemy

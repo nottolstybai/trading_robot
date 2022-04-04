@@ -12,6 +12,8 @@
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <script src="{{ url_for('scripts', path='/searcher.js') }}"></script>
     <script src="{{ url_for('scripts', path='/apiPost.js') }}"></script>
+    <script src="{{ url_for('scripts', path='/equityChart.js') }}"></script>
+    <script src="{{ url_for('scripts', path='/orders.js') }}"></script>
     <title>Stocks</title>
 </head>
 <body>
@@ -24,7 +26,7 @@
             <a class="item" href="http://localhost:8000/strategies">Strategies</a>
         <div class="right menu">
             <div class="item">
-                <div class="ui primary button">Sign Up</div>
+                <button class="ui primary button">Sign Up</button>
             </div>
         </div>
     </div>
